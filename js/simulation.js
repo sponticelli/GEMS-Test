@@ -1,12 +1,11 @@
 /* eslint-env jquery */
-/*global google*/
-/*eslint no-undef: "error"*/
 
 import { MatchSimulation } from "./Simulations/matchSimulation.js";
 import { PlayerView } from "./Player/playerView.js";
 import { PlayerFactory } from "./Player/playerFactory.js";
 import { MetaConfig, SimConfig } from "./data.js";
 import { Graph } from "./graph";
+import { Counter } from "./Stats/counter";
 
 export function Simulate() {
   const maxPlayers = SimConfig.NumPlayers;
@@ -20,35 +19,24 @@ export function Simulate() {
     MatchLost: 0
   };
 
-  var avgTokens = [];
-  var avgCoins = [];
-  var avgMatches = [];
-  var avgDivision = [];
-  for (var i = 0; i <= maxMatches; i++) {
-    avgTokens.push([i, 0]);
-    avgCoins.push([i, 0]);
-    avgMatches.push([i, 0]);
-    avgDivision.push([i, 0]);
-  }
+  const counter = new Counter();
 
   const matchSimulation = new MatchSimulation(MetaConfig);
 
-  for (i = 0; i < maxPlayers; i++) {
+  for (var i = 0; i < maxPlayers; i++) {
     let player = PlayerFactory.CreateRandom(i, SimConfig.PlayerInfo);
-    avgTokens[0] = [0, avgTokens[0][1] + player.Tokens.Value];
-    avgCoins[0] = [0, avgCoins[0][1] + player.Coins.Value];
-    avgDivision[0] = [0, avgDivision[0][1] + player.Division.Value];
+
+    counter.add("tokens", 0, player.Tokens.Value);
+    counter.add("coins", 0, player.Coins.Value);
+    counter.add("division", 0, player.Division.Value);
 
     for (var j = 0; j < maxMatches; j++) {
       if (matchSimulation.execute(player)) {
-        avgMatches[j + 1] = [j + 1, avgMatches[j + 1][1] + 1];
+        counter.add("matches", j + 1, 1);
       }
-      avgTokens[j + 1] = [j + 1, avgTokens[j + 1][1] + player.Tokens.Value];
-      avgCoins[j + 1] = [j + 1, avgCoins[j + 1][1] + player.Coins.Value];
-      avgDivision[j + 1] = [
-        j + 1,
-        avgDivision[j + 1][1] + player.Division.Value
-      ];
+      counter.add("tokens", j + 1, player.Tokens.Value);
+      counter.add("coins", j + 1, player.Coins.Value);
+      counter.add("division", j + 1, player.Division.Value);
     }
     PlayerView.printDelta(player);
     var delta = player.delta();
@@ -58,17 +46,10 @@ export function Simulate() {
     }
   }
 
-  for (i = 0; i <= maxMatches; i++) {
-    avgTokens[i] = [i, avgTokens[i][1] / maxPlayers];
-    avgCoins[i] = [i, avgCoins[i][1] / maxPlayers];
-    avgDivision[i] = [i, avgDivision[i][1] / maxPlayers];
-    //avgMatches[i] = [i, avgMatches[i][1] / maxPlayers];
-  }
-
-  google.charts.setOnLoadCallback(() => {
+  const graph = new Graph(() => {
     //Tokens
-    Graph.drawSingleLineChart(
-      avgTokens,
+    graph.drawSingleLineChart(
+      counter.getTimedAvgValues("tokens", maxPlayers),
       ["X", "Tokens"],
       "Time",
       "Tokens",
@@ -77,8 +58,8 @@ export function Simulate() {
     );
 
     //Division
-    Graph.drawSingleLineChart(
-      avgDivision,
+    graph.drawSingleLineChart(
+      counter.getTimedAvgValues("division", maxPlayers),
       ["X", "Division"],
       "Time",
       "Division",
@@ -86,8 +67,8 @@ export function Simulate() {
       "#F0F8FF"
     );
     //Coins
-    Graph.drawSingleLineChart(
-      avgCoins,
+    graph.drawSingleLineChart(
+      counter.getTimedAvgValues("coins", maxPlayers),
       ["X", "Coins"],
       "Time",
       "Coins",
@@ -96,8 +77,8 @@ export function Simulate() {
     );
 
     //Matches
-    Graph.drawSingleLineChart(
-      avgMatches,
+    graph.drawSingleLineChart(
+      counter.getTimedValues("matches"),
       ["X", "Matches"],
       "Time",
       "Matches",

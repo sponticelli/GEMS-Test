@@ -2,14 +2,12 @@
 /*eslint no-undef: "error"*/
 
 export class Graph {
-  static drawSingleLineChart(
-    rows,
-    columns,
-    hAxis,
-    vAxis,
-    elementId,
-    backgroundColor
-  ) {
+  constructor(callback) {
+    google.charts.load("current", { packages: ["corechart", "line"] });
+    google.charts.setOnLoadCallback(callback);
+  }
+
+  drawSingleLineChart(rows, columns, hAxis, vAxis, elementId, backgroundColor) {
     var data = new google.visualization.DataTable();
 
     for (var i = 0; i < columns.length; i++) {
