@@ -1,5 +1,5 @@
-import { NumericValue } from "./numericValue.js";
-import { Division } from "./division.js";
+import { NumericValue } from "../numericValue.js";
+import { Division } from "../division.js";
 
 export class Player {
   constructor(id, coins, tokens) {

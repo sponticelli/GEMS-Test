@@ -3,9 +3,10 @@
 /*eslint no-undef: "error"*/
 
 import { MatchSimulation } from "./Simulations/matchSimulation.js";
-import { PlayerView } from "./playerView.js";
-import { PlayerFactory } from "./playerFactory.js";
+import { PlayerView } from "./Player/playerView.js";
+import { PlayerFactory } from "./Player/playerFactory.js";
 import { MetaConfig, SimConfig } from "./data.js";
+import { Graph } from "./graph";
 
 export function Simulate() {
   const maxPlayers = SimConfig.NumPlayers;
@@ -65,10 +66,44 @@ export function Simulate() {
   }
 
   google.charts.setOnLoadCallback(() => {
-    drawTokens(avgTokens);
-    drawCoins(avgCoins);
-    drawMatches(avgMatches);
-    drawDivision(avgDivision);
+    //Tokens
+    Graph.drawSingleLineChart(
+      avgTokens,
+      ["X", "Tokens"],
+      "Time",
+      "Tokens",
+      "chart_div_avgtokens",
+      "#f1f8e9"
+    );
+
+    //Division
+    Graph.drawSingleLineChart(
+      avgDivision,
+      ["X", "Division"],
+      "Time",
+      "Division",
+      "chart_div_avgdivision",
+      "#F0F8FF"
+    );
+    //Coins
+    Graph.drawSingleLineChart(
+      avgCoins,
+      ["X", "Coins"],
+      "Time",
+      "Coins",
+      "chart_div_avgcoins",
+      "#FFFFE0"
+    );
+
+    //Matches
+    Graph.drawSingleLineChart(
+      avgMatches,
+      ["X", "Matches"],
+      "Time",
+      "Matches",
+      "chart_div_avgmatches",
+      "#f3f3f3"
+    );
   });
 
   $("#playerDelta tfoot").append(
@@ -88,80 +123,4 @@ export function Simulate() {
       Math.round(cumulatedDelta.MatchLost / maxPlayers) +
       "</th></tr>"
   );
-}
-
-function drawDivision(rows) {
-  drawLineChart(
-    rows,
-    ["X", "Division"],
-    "Time",
-    "Division",
-    "chart_div_avgdivision",
-    "#F0F8FF"
-  );
-}
-
-function drawTokens(rows) {
-  drawLineChart(
-    rows,
-    ["X", "Tokens"],
-    "Time",
-    "Tokens",
-    "chart_div_avgtokens",
-    "#f1f8e9"
-  );
-}
-
-function drawCoins(rows) {
-  drawLineChart(
-    rows,
-    ["X", "Coins"],
-    "Time",
-    "Coins",
-    "chart_div_avgcoins",
-    "#FFFFE0"
-  );
-}
-
-function drawMatches(rows) {
-  drawLineChart(
-    rows,
-    ["X", "Matches"],
-    "Time",
-    "Matches",
-    "chart_div_avgmatches",
-    "#f3f3f3"
-  );
-}
-
-function drawLineChart(
-  rows,
-  columns,
-  hAxis,
-  vAxis,
-  elementId,
-  backgroundColor
-) {
-  var data = new google.visualization.DataTable();
-
-  for (var i = 0; i < columns.length; i++) {
-    data.addColumn("number", columns[i]);
-  }
-
-  data.addRows(rows);
-
-  var options = {
-    hAxis: {
-      title: hAxis
-    },
-    vAxis: {
-      title: vAxis
-    },
-    backgroundColor: backgroundColor
-  };
-
-  var chart = new google.visualization.LineChart(
-    document.getElementById(elementId)
-  );
-  chart.draw(data, options);
 }
