@@ -1,0 +1,26 @@
+body {
+    background: white; /* try type yellow */
+    color: #323232;
+
+    margin: 20px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-family: Helvetica neue, roboto;
+}
+
+table {
+    border-collapse: collapse;
+}
+
+td, th {
+    border: 1px solid #999;
+    padding: 0.5rem;
+    text-align: left;
+}
+
+.grid-container {
+    display: grid;
+}
